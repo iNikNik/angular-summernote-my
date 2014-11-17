@@ -117,11 +117,11 @@ angular.module('summernote', [])
 
             var pluginData = angular.copy(plugin);
 
-            angular.forEach(pluginData.buttons, function (btn) {
+            angular.forEach(pluginData.buttons, function (btn, key) {
                 pluginData.buttons[key] = injectTmpl(btn);
             });
 
-            angular.forEach(pluginData.events, function (event) {
+            angular.forEach(pluginData.events, function (event, key) {
                 pluginData.events[key] = injectEditor(event);
             });
 
