@@ -105,7 +105,53 @@ angular.module('summernote', [])
       }
     });
   }])
-  .directive('summernote', [function() {
+  .factory('SummernotePlugins',[function () {
+        var tmpl = $.summernote.renderer.getTemplate(),
+            editor = $.summernote.eventHandler.getEditor(),
+            installedPlugins = [];
+
+        function installPlugin(plugin) {
+
+            if(isInstalled(plugin))
+                return;
+
+            var pluginData = angular.copy(plugin);
+
+            angular.forEach(pluginData.buttons, function (btn) {
+                pluginData.buttons[key] = injectTmpl(btn);
+            });
+
+            angular.forEach(pluginData.events, function (event) {
+                pluginData.events[key] = injectEditor(event);
+            });
+
+            $.summernote.addPlugin(pluginData);
+            installedPlugins.push(plugin);
+        }
+
+        function isInstalled(plugin) {
+            return installedPlugins.filter(function (p) {
+                return p.name == plugin.name;
+            }).length > 0;
+        }
+
+        function injectTmpl(f) {
+            return function () {
+                f(tmpl);
+            }
+        }
+
+        function injectEditor(f) {
+            return function (layoutInfo, value) {
+                f(editor,layoutInfo, value);
+            }
+        }
+
+        return {
+            install: installPlugin
+        }
+  }])
+  .directive('summernote', ['SummernotePlugins',function(SummernotePlugins) {
     'use strict';
 
     return {
@@ -116,6 +162,7 @@ angular.module('summernote', [])
       controller: 'SummernoteController',
       scope: {
         summernoteConfig: '=config',
+        summernotePlugins: '=?plugins',
         editable: '=',
         init: '&onInit',
         enter: '&onEnter',
@@ -131,6 +178,9 @@ angular.module('summernote', [])
       link: function(scope, element, attrs, ctrls) {
         var summernoteController = ctrls[0],
             ngModel = ctrls[1];
+
+        if(scope.summernotePlugins)
+            scope.summernotePlugins.map(SummernotePlugins.install);
 
         summernoteController.activate(scope, element, ngModel);
       }
