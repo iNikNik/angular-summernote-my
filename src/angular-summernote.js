@@ -137,13 +137,13 @@ angular.module('summernote', [])
 
         function injectTmpl(f) {
             return function () {
-                f(tmpl);
+                return f(tmpl);
             }
         }
 
         function injectEditor(f) {
             return function (layoutInfo, value) {
-                f(editor,layoutInfo, value);
+                return f(editor,layoutInfo, value);
             }
         }
 
