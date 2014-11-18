@@ -106,26 +106,26 @@ angular.module('summernote', [])
     });
   }])
   .factory('SummernotePlugins',[function () {
-        var tmpl = $.summernote.renderer.getTemplate(),
-            editor = $.summernote.eventHandler.getEditor(),
-            installedPlugins = [];
+        var installedPlugins = [];
 
         function installPlugin(plugin) {
 
             if(isInstalled(plugin))
                 return;
 
-            var pluginData = angular.copy(plugin);
-
-            angular.forEach(pluginData.buttons, function (btn, key) {
-                pluginData.buttons[key] = injectTmpl(btn);
+            angular.forEach(plugin.buttons, function (btn, key) {
+                plugin.buttons[key] = inject(btn);
             });
 
-            angular.forEach(pluginData.events, function (event, key) {
-                pluginData.events[key] = injectEditor(event);
+            angular.forEach(plugin.dialogs, function (dialog, key) {
+                plugin.dialogs[key] = inject(dialog);
             });
 
-            $.summernote.addPlugin(pluginData);
+            angular.forEach(plugin.events, function (event, key) {
+                plugin.events[key] = inject(event);
+            });
+
+            $.summernote.addPlugin(plugin);
             installedPlugins.push(plugin);
         }
 
@@ -135,16 +135,11 @@ angular.module('summernote', [])
             }).length > 0;
         }
 
-        function injectTmpl(f) {
+        function inject(f)
+        {
             return function () {
-                return f(tmpl);
-            }
-        }
-
-        function injectEditor(f) {
-            return function (layoutInfo, value) {
-                return f(editor,layoutInfo, value);
-            }
+                return f.call(null,[ $.summernote ].concat(arguments));
+            };
         }
 
         return {
