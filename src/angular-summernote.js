@@ -138,7 +138,9 @@ angular.module('summernote', [])
         function inject(f)
         {
             return function () {
-                return f.call(null,[ $.summernote ].concat(arguments));
+                var args = Array.prototype.slice.call(arguments);
+                args.unshift($.summernote);
+                return f.apply(f,args);
             };
         }
 
