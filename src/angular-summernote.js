@@ -108,10 +108,16 @@ angular.module('summernote', [])
   .factory('SummernotePlugins',[function () {
         var installedPlugins = [];
 
-        function installPlugin(plugin) {
+        function installPlugin(plugin,forceInstall) {
 
-            if(isInstalled(plugin))
+            if(!isInstalled(plugin)) {
+                installedPlugins.push(plugin.name);
+            }
+            else if(!forceInstall) {
+                // if plugin installed, and we don't want to reinstall
+                console.warn('angular-summernote: trying to reinstall plugin: "'+plugin.name+'" [Rejected]');
                 return;
+            }
 
             angular.forEach(plugin.buttons, function (btn, key) {
                 plugin.buttons[key] = inject(btn);
@@ -126,7 +132,6 @@ angular.module('summernote', [])
             });
 
             $.summernote.addPlugin(plugin);
-            installedPlugins.push(plugin);
         }
 
         function isInstalled(plugin) {
